@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBzDUYX4t0MRApa1ZI_V4K4FYFz-7UpkrE',
+    apiKey: 'AIzaSyBzDUYX4t0MRApa1Zl_V4K4FYFz-7UpkrE',
     appId: '1:872667661054:web:231ee7bdecb41a065c9baf',
     messagingSenderId: '872667661054',
     projectId: 'eco-carbon-tracker-e05ed',
