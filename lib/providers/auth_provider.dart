@@ -22,6 +22,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
+      // 檢查當前用戶狀態
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        // 用戶已登入，獲取用戶資料
+        await _loadUserFromFirestore(currentUser.uid);
+      } else {
+        // 用戶未登入
+        _userModel = null;
+      }
+      
       // 監聽Firebase認證狀態變化
       _auth.authStateChanges().listen((User? firebaseUser) async {
         if (firebaseUser != null) {
@@ -34,6 +44,10 @@ class AuthProvider extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
       });
+      
+      // 確保初始化完成後設置loading為false
+      _isLoading = false;
+      notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
