@@ -118,8 +118,11 @@ class AuthProvider extends ChangeNotifier {
         case 'invalid-email':
           _errorMessage = '無效的電子郵件';
           break;
+        case 'operation-not-allowed':
+          _errorMessage = 'Email/Password 認證未啟用，請檢查Firebase設置';
+          break;
         default:
-          _errorMessage = '註冊失敗: ${e.message}';
+          _errorMessage = '註冊失敗: ${e.code} - ${e.message}';
       }
       return false;
     } catch (e) {
