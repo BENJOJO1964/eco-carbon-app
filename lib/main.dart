@@ -5,12 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/carbon_provider.dart';
-import 'services/auto_detection_manager.dart';
-import 'services/invoice_carrier_service.dart';
-import 'services/payment_binding_service.dart';
-import 'services/camera_scanning_service.dart';
-import 'services/smart_auto_detection_service.dart';
-import 'services/permission_service.dart';
+// import 'services/auto_detection_manager.dart';
+// import 'services/invoice_carrier_service.dart';
+// import 'services/payment_binding_service.dart';
+// import 'services/camera_scanning_service.dart';
+// import 'services/smart_auto_detection_service.dart';
+// import 'services/permission_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'l10n/app_localizations.dart';
@@ -41,12 +41,12 @@ class EcoApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (_) => AuthProvider()),
           ChangeNotifierProvider(create: (_) => CarbonProvider()),
-          ChangeNotifierProvider(create: (_) => AutoDetectionManager()),
-          ChangeNotifierProvider(create: (_) => InvoiceCarrierService()),
-          ChangeNotifierProvider(create: (_) => PaymentBindingService()),
-          ChangeNotifierProvider(create: (_) => CameraScanningService()),
-          ChangeNotifierProvider(create: (_) => SmartAutoDetectionService()),
-          ChangeNotifierProvider(create: (_) => PermissionService()),
+          // ChangeNotifierProvider(create: (_) => AutoDetectionManager()),
+          // ChangeNotifierProvider(create: (_) => InvoiceCarrierService()),
+          // ChangeNotifierProvider(create: (_) => PaymentBindingService()),
+          // ChangeNotifierProvider(create: (_) => CameraScanningService()),
+          // ChangeNotifierProvider(create: (_) => SmartAutoDetectionService()),
+          // ChangeNotifierProvider(create: (_) => PermissionService()),
         ],
       child: MaterialApp(
         title: 'Eco - 碳足跡追蹤',
