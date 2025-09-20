@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "872667661054",
+    "project_id": "eco-carbon-tracker-e05ed",
+    "storage_bucket": "eco-carbon-tracker-e05ed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872667661054:android:231ee7bdecb41a065c9baf",
+        "android_client_info": {
+          "package_name": "com.example.eco"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUV9hc9IEWEEifMRZvG381lxrG_FetVOU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

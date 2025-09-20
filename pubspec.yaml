@@ -1,0 +1,41 @@
+name: eco
+description: "碳足迹追踪APP - 环保生活助手"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
+  geolocator: ^10.1.0
+  permission_handler: ^11.0.1
+  geocoding: ^2.1.1
+  http: ^1.1.0
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.3
+  fl_chart: ^0.69.0
+  sensors_plus: ^4.0.2
+  camera: ^0.10.5+9
+  image_picker: ^1.0.7
+  google_mlkit_text_recognition: ^0.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+  generate: true
