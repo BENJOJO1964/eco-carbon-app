@@ -41,12 +41,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:web:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'eco-app-demo',
-    authDomain: 'eco-app-demo.firebaseapp.com',
-    storageBucket: 'eco-app-demo.appspot.com',
+    apiKey: 'AlzaSyBzDUYX4t0MRApa1ZI_V4K4FYFz-7UpkrE',
+    appId: '1:872667661054:web:231ee7bdecb41a065c9baf',
+    messagingSenderId: '872667661054',
+    projectId: 'eco-carbon-tracker-e05ed',
+    authDomain: 'eco-carbon-tracker-e05ed.firebaseapp.com',
+    storageBucket: 'eco-carbon-tracker-e05ed.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
