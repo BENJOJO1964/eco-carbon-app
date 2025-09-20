@@ -18,22 +18,30 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _userModel != null;
 
   Future<void> initialize() async {
+    print('AuthProvider: Starting initialization...');
     _isLoading = true;
     notifyListeners();
     
     try {
       // 檢查當前用戶狀態
+      print('AuthProvider: Checking Firebase auth...');
       final currentUser = _auth.currentUser;
+      print('AuthProvider: Current user: ${currentUser?.uid ?? 'null'}');
+      
       if (currentUser != null) {
         // 用戶已登入，獲取用戶資料
+        print('AuthProvider: Loading user from Firestore...');
         await _loadUserFromFirestore(currentUser.uid);
       } else {
         // 用戶未登入
+        print('AuthProvider: No current user');
         _userModel = null;
       }
       
       // 監聽Firebase認證狀態變化
+      print('AuthProvider: Setting up auth state listener...');
       _auth.authStateChanges().listen((User? firebaseUser) async {
+        print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
         if (firebaseUser != null) {
           // 用戶已登入，獲取用戶資料
           await _loadUserFromFirestore(firebaseUser.uid);
@@ -42,10 +50,19 @@ class AuthProvider extends ChangeNotifier {
           _userModel = null;
         }
         _isLoading = false;
+        print('AuthProvider: Auth state listener - loading set to false');
         notifyListeners();
       });
       
+      // 如果沒有當前用戶，立即停止加載
+      if (currentUser == null) {
+        _isLoading = false;
+        print('AuthProvider: No current user - stopping loading');
+        notifyListeners();
+      }
+      
     } catch (e) {
+      print('AuthProvider: Error during initialization: $e');
       _errorMessage = e.toString();
       _isLoading = false;
       notifyListeners();
