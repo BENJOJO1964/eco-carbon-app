@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
-  // 简化的本地认证系统，不依赖Firebase
+  // Firebase認證系統
   
   UserModel? _userModel;
   bool _isLoading = false;
   String? _errorMessage;
-  final Map<String, String> _users = {}; // 简单的用户存储
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   UserModel? get user => _userModel;
   bool get isLoading => _isLoading;
@@ -20,24 +22,39 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // 检查本地存储的用户信息
-      final prefs = await SharedPreferences.getInstance();
-      final userEmail = prefs.getString('user_email');
-      final userName = prefs.getString('user_name');
-      
-      if (userEmail != null && userName != null) {
+      // 監聽Firebase認證狀態變化
+      _auth.authStateChanges().listen((User? firebaseUser) async {
+        if (firebaseUser != null) {
+          // 用戶已登入，獲取用戶資料
+          await _loadUserFromFirestore(firebaseUser.uid);
+        } else {
+          // 用戶未登入
+          _userModel = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+      });
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadUserFromFirestore(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final data = doc.data()!;
         _userModel = UserModel(
-          id: userEmail,
-          email: userEmail,
-          name: userName,
-          createdAt: DateTime.now(),
+          id: uid,
+          email: data['email'] ?? '',
+          name: data['name'] ?? '',
+          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
       }
     } catch (e) {
       _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -47,36 +64,52 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 检查用户是否已存在
-      if (_users.containsKey(email)) {
-        _errorMessage = '用户已存在';
-        return false;
-      }
-
-      // 简单的密码验证
-      if (password.length < 6) {
-        _errorMessage = '密码至少需要6位';
-        return false;
-      }
-
-      // 创建新用户
-      _users[email] = password;
-      
-      _userModel = UserModel(
-        id: email,
+      // 使用Firebase創建用戶
+      final UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
-        name: name,
-        createdAt: DateTime.now(),
+        password: password,
       );
 
-      // 保存到本地存储
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_email', email);
-      await prefs.setString('user_name', name);
+      final User? user = result.user;
+      if (user != null) {
+        // 更新用戶顯示名稱
+        await user.updateDisplayName(name);
+        
+        // 保存用戶資料到Firestore
+        await _firestore.collection('users').doc(user.uid).set({
+          'email': email,
+          'name': name,
+          'createdAt': Timestamp.now(),
+        });
 
-      return true;
+        // 創建用戶模型
+        _userModel = UserModel(
+          id: user.uid,
+          email: email,
+          name: name,
+          createdAt: DateTime.now(),
+        );
+
+        return true;
+      }
+      return false;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'weak-password':
+          _errorMessage = '密碼太弱';
+          break;
+        case 'email-already-in-use':
+          _errorMessage = '此電子郵件已被使用';
+          break;
+        case 'invalid-email':
+          _errorMessage = '無效的電子郵件';
+          break;
+        default:
+          _errorMessage = '註冊失敗: ${e.message}';
+      }
+      return false;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = '註冊失敗: $e';
       return false;
     } finally {
       _isLoading = false;
@@ -90,34 +123,39 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 检查用户是否存在
-      if (!_users.containsKey(email)) {
-        _errorMessage = '用户不存在';
-        return false;
-      }
-
-      // 验证密码
-      if (_users[email] != password) {
-        _errorMessage = '密码错误';
-        return false;
-      }
-
-      // 创建用户模型
-      _userModel = UserModel(
-        id: email,
+      // 使用Firebase登入
+      final UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
-        name: email.split('@')[0], // 使用邮箱前缀作为用户名
-        createdAt: DateTime.now(),
+        password: password,
       );
 
-      // 保存到本地存储
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_email', email);
-      await prefs.setString('user_name', _userModel!.name);
-
-      return true;
+      final User? user = result.user;
+      if (user != null) {
+        // 從Firestore獲取用戶資料
+        await _loadUserFromFirestore(user.uid);
+        return true;
+      }
+      return false;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          _errorMessage = '用戶不存在';
+          break;
+        case 'wrong-password':
+          _errorMessage = '密碼錯誤';
+          break;
+        case 'invalid-email':
+          _errorMessage = '無效的電子郵件';
+          break;
+        case 'user-disabled':
+          _errorMessage = '用戶已被停用';
+          break;
+        default:
+          _errorMessage = '登入失敗: ${e.message}';
+      }
+      return false;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = '登入失敗: $e';
       return false;
     } finally {
       _isLoading = false;
@@ -130,11 +168,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 清除本地存储
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('user_email');
-      await prefs.remove('user_name');
-      
+      // 使用Firebase登出
+      await _auth.signOut();
       _userModel = null;
     } catch (e) {
       _errorMessage = e.toString();
