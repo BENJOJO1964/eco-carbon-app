@@ -45,9 +45,6 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       });
       
-      // 確保初始化完成後設置loading為false
-      _isLoading = false;
-      notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
