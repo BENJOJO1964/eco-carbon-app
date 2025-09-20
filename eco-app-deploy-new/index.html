@@ -5,20 +5,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>碳足跡追蹤</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="favicon.png"/>
 </head>
 <body>
+  <h1>測試頁面</h1>
+  <p>如果您看到這個頁面，說明HTML文件可以正常加載。</p>
+  
   <script>
-    console.log('HTML loaded, starting Flutter...');
+    console.log('HTML loaded successfully!');
     console.log('Testing basic JavaScript execution...');
-  </script>
-  <script>
-    console.log('About to load flutter_bootstrap.js...');
-  </script>
-  <script src="flutter_bootstrap.js" async></script>
-  <script>
-    console.log('flutter_bootstrap.js script tag added');
+    
+    // 測試Flutter文件是否存在
+    fetch('flutter_bootstrap.js')
+      .then(response => {
+        console.log('flutter_bootstrap.js response:', response.status);
+        if (response.ok) {
+          console.log('flutter_bootstrap.js exists and is accessible');
+        } else {
+          console.error('flutter_bootstrap.js not found or not accessible');
+        }
+      })
+      .catch(error => {
+        console.error('Error checking flutter_bootstrap.js:', error);
+      });
+      
+    fetch('main.dart.js')
+      .then(response => {
+        console.log('main.dart.js response:', response.status);
+        if (response.ok) {
+          console.log('main.dart.js exists and is accessible');
+        } else {
+          console.error('main.dart.js not found or not accessible');
+        }
+      })
+      .catch(error => {
+        console.error('Error checking main.dart.js:', error);
+      });
   </script>
 </body>
 </html>
