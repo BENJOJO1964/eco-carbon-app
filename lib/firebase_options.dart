@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:android:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'eco-app-demo',
-    storageBucket: 'eco-app-demo.appspot.com',
+    apiKey: 'AIzaSyBzDUYX4t0MRApa1Zl_V4K4FYFz-7UpkrE',
+    appId: '1:872667661054:android:231ee7bdecb41a065c9baf',
+    messagingSenderId: '872667661054',
+    projectId: 'eco-carbon-tracker-e05ed',
+    storageBucket: 'eco-carbon-tracker-e05ed.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -67,20 +67,20 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:ios:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'eco-app-demo',
-    storageBucket: 'eco-app-demo.appspot.com',
+    apiKey: 'AIzaSyBzDUYX4t0MRApa1Zl_V4K4FYFz-7UpkrE',
+    appId: '1:872667661054:ios:1f475dc20445cc9a5c9baf',
+    messagingSenderId: '872667661054',
+    projectId: 'eco-carbon-tracker-e05ed',
+    storageBucket: 'eco-carbon-tracker-e05ed.appspot.com',
     iosBundleId: 'com.example.eco',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:web:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'eco-app-demo',
-    authDomain: 'eco-app-demo.firebaseapp.com',
-    storageBucket: 'eco-app-demo.appspot.com',
+    apiKey: 'AIzaSyBzDUYX4t0MRApa1Zl_V4K4FYFz-7UpkrE',
+    appId: '1:872667661054:web:231ee7bdecb41a065c9baf',
+    messagingSenderId: '872667661054',
+    projectId: 'eco-carbon-tracker-e05ed',
+    authDomain: 'eco-carbon-tracker-e05ed.firebaseapp.com',
+    storageBucket: 'eco-carbon-tracker-e05ed.appspot.com',
   );
 }
