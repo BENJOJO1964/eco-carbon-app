@@ -30,12 +30,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // 強制登出所有用戶（清除任何預設登入狀態）
-      print('AuthProvider: Force signing out all users...');
-      await _auth.signOut();
-      _userModel = null;
+      // 檢查當前登入狀態，不強制登出
+      final currentUser = _auth.currentUser;
+      print('AuthProvider: Current user: ${currentUser?.uid ?? 'null'}');
       
-      // 設置認證狀態監聽器（但只監聽一次，避免無限循環）
+      // 設置認證狀態監聽器
       print('AuthProvider: Setting up auth state listener...');
       _auth.authStateChanges().listen((User? firebaseUser) async {
         print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
