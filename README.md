@@ -174,3 +174,4 @@ flutter build ios --release
 
 感谢所有为环保事业做出贡献的开发者和用户！# 觸發 Vercel 重新部署 - Wed Sep 24 18:05:30 CST 2025
 # 強制觸發 Vercel 重新部署 - Wed Sep 24 18:16:52 CST 2025
+# 最終修復部署 - Wed Sep 24 18:18:52 CST 2025
