@@ -9,6 +9,7 @@ class AuthProvider extends ChangeNotifier {
   UserModel? _userModel;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _hasAuthListener = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -38,31 +39,32 @@ class AuthProvider extends ChangeNotifier {
         _userModel = null;
       }
       
-      // 監聽Firebase認證狀態變化
-      print('AuthProvider: Setting up auth state listener...');
-      _auth.authStateChanges().listen((User? firebaseUser) async {
-        print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
-        if (firebaseUser != null) {
-          // 用戶已登入，獲取用戶資料
-          await _loadUserFromFirestore(firebaseUser.uid);
-        } else {
-          // 用戶未登入
-          _userModel = null;
-        }
-        // 只在狀態真正改變時才更新 loading 狀態
-        if (_isLoading) {
-          _isLoading = false;
-          print('AuthProvider: Auth state listener - loading set to false');
-          notifyListeners();
-        }
-      });
-      
-      // 如果沒有當前用戶，立即停止加載
-      if (currentUser == null) {
-        _isLoading = false;
-        print('AuthProvider: No current user - stopping loading');
-        notifyListeners();
+      // 設置認證狀態監聽器（只設置一次）
+      if (!_hasAuthListener) {
+        _hasAuthListener = true;
+        print('AuthProvider: Setting up auth state listener...');
+        _auth.authStateChanges().listen((User? firebaseUser) async {
+          print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
+          if (firebaseUser != null) {
+            // 用戶已登入，獲取用戶資料
+            await _loadUserFromFirestore(firebaseUser.uid);
+          } else {
+            // 用戶未登入
+            _userModel = null;
+          }
+          // 只在狀態真正改變時才更新 loading 狀態
+          if (_isLoading) {
+            _isLoading = false;
+            print('AuthProvider: Auth state listener - loading set to false');
+            notifyListeners();
+          }
+        });
       }
+      
+      // 完成初始化
+      _isLoading = false;
+      print('AuthProvider: Initialization complete');
+      notifyListeners();
       
     } catch (e) {
       print('AuthProvider: Error during initialization: $e');
