@@ -384,6 +384,34 @@ class _AuthScreenState extends State<AuthScreen> {
                             );
                           },
                         ),
+                        const SizedBox(height: 16),
+
+                        // 測試帳號快速登入按鈕
+                        Container(
+                          width: double.infinity,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _quickLoginTest,
+                              borderRadius: BorderRadius.circular(12),
+                              child: const Center(
+                                child: Text(
+                                  '使用測試帳號登入 (test@example.com)',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 20),
 
                         // 切换登录/注册
@@ -431,6 +459,31 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       ),
     );
+  }
+
+  void _quickLoginTest() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // 先尝试注册测试账号，如果已存在则直接登录
+    bool success = await authProvider.signUp(
+      'test@example.com',
+      '123456',
+      '測試用戶',
+    );
+    
+    if (!success) {
+      // 如果注册失败（账号已存在），尝试登录
+      success = await authProvider.signIn(
+        'test@example.com',
+        '123456',
+      );
+    }
+    
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
   }
 
   void _handleSubmit() async {
