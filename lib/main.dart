@@ -172,15 +172,23 @@ class EcoApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _hasInitialized = false;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // 初始化认证状态
-        if (authProvider.user == null && !authProvider.isLoading) {
+        // 只在第一次載入時初始化認證狀態
+        if (!_hasInitialized) {
+          _hasInitialized = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             authProvider.initialize();
           });

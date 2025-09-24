@@ -49,9 +49,12 @@ class AuthProvider extends ChangeNotifier {
           // 用戶未登入
           _userModel = null;
         }
-        _isLoading = false;
-        print('AuthProvider: Auth state listener - loading set to false');
-        notifyListeners();
+        // 只在狀態真正改變時才更新 loading 狀態
+        if (_isLoading) {
+          _isLoading = false;
+          print('AuthProvider: Auth state listener - loading set to false');
+          notifyListeners();
+        }
       });
       
       // 如果沒有當前用戶，立即停止加載
