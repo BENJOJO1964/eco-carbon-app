@@ -35,9 +35,24 @@ class AuthProvider extends ChangeNotifier {
       await _auth.signOut();
       _userModel = null;
       
-      // 完成初始化 - 不設置監聽器，避免無限循環
+      // 設置認證狀態監聽器（但只監聽一次，避免無限循環）
+      print('AuthProvider: Setting up auth state listener...');
+      _auth.authStateChanges().listen((User? firebaseUser) async {
+        print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
+        if (firebaseUser != null) {
+          // 用戶已登入，獲取用戶資料
+          await _loadUserFromFirestore(firebaseUser.uid);
+        } else {
+          // 用戶未登入
+          _userModel = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+      });
+      
+      // 完成初始化
       _isLoading = false;
-      print('AuthProvider: Initialization complete - no auth listener');
+      print('AuthProvider: Initialization complete with auth listener');
       notifyListeners();
       
     } catch (e) {
