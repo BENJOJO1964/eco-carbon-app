@@ -1,6 +1,6 @@
 {
   "buildCommand": "echo 'Using pre-built files'",
-  "outputDirectory": "eco-app-deploy",
+  "outputDirectory": "public",
   "installCommand": "echo 'No installation needed'",
   "framework": null,
   "rewrites": [
