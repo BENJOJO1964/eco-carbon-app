@@ -176,3 +176,4 @@ flutter build ios --release
 # 強制觸發 Vercel 重新部署 - Wed Sep 24 18:16:52 CST 2025
 # 最終修復部署 - Wed Sep 24 18:18:52 CST 2025
 # 修復登入註冊問題部署 - Wed Sep 24 18:23:03 CST 2025
+# 修復登入註冊跳轉問題部署 - Wed Sep 24 18:26:55 CST 2025
