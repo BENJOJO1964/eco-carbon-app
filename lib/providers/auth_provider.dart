@@ -59,8 +59,13 @@ class AuthProvider extends ChangeNotifier {
           name: data['name'] ?? '',
           createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
+        print('AuthProvider: User loaded from Firestore: ${_userModel?.email}');
+      } else {
+        print('AuthProvider: User document not found in Firestore');
+        _errorMessage = '用戶資料不存在';
       }
     } catch (e) {
+      print('AuthProvider: Error loading user from Firestore: $e');
       _errorMessage = e.toString();
     }
   }
@@ -96,7 +101,8 @@ class AuthProvider extends ChangeNotifier {
           name: name,
           createdAt: DateTime.now(),
         );
-
+        
+        print('AuthProvider: User registered successfully: ${_userModel?.email}');
         return true;
       }
       return false;
