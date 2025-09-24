@@ -35,25 +35,9 @@ class AuthProvider extends ChangeNotifier {
       await _auth.signOut();
       _userModel = null;
       
-      // 設置認證狀態監聽器
-      print('AuthProvider: Setting up auth state listener...');
-      _auth.authStateChanges().listen((User? firebaseUser) async {
-        print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
-        if (firebaseUser != null) {
-          // 用戶已登入，獲取用戶資料
-          await _loadUserFromFirestore(firebaseUser.uid);
-        } else {
-          // 用戶未登入
-          _userModel = null;
-        }
-        _isLoading = false;
-        print('AuthProvider: Auth state listener - notifying listeners');
-        notifyListeners();
-      });
-      
-      // 完成初始化
+      // 完成初始化 - 不設置監聽器，避免無限循環
       _isLoading = false;
-      print('AuthProvider: Initialization complete');
+      print('AuthProvider: Initialization complete - no auth listener');
       notifyListeners();
       
     } catch (e) {
@@ -159,8 +143,12 @@ class AuthProvider extends ChangeNotifier {
       if (user != null) {
         // 從Firestore獲取用戶資料
         await _loadUserFromFirestore(user.uid);
+        _isLoading = false;
+        notifyListeners();
         return true;
       }
+      _isLoading = false;
+      notifyListeners();
       return false;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -179,13 +167,14 @@ class AuthProvider extends ChangeNotifier {
         default:
           _errorMessage = '登入失敗: ${e.message}';
       }
+      _isLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       _errorMessage = '登入失敗: $e';
-      return false;
-    } finally {
       _isLoading = false;
       notifyListeners();
+      return false;
     }
   }
 
@@ -197,9 +186,10 @@ class AuthProvider extends ChangeNotifier {
       // 使用Firebase登出
       await _auth.signOut();
       _userModel = null;
+      _isLoading = false;
+      notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
-    } finally {
       _isLoading = false;
       notifyListeners();
     }
