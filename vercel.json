@@ -1,6 +1,0 @@
-{
-  "buildCommand": "echo 'Using pre-built files'",
-  "outputDirectory": "eco-app-deploy",
-  "installCommand": "echo 'No installation needed'",
-  "framework": null
-}
