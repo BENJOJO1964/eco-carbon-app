@@ -117,6 +117,8 @@ class AuthProvider extends ChangeNotifier {
         );
         
         print('AuthProvider: User registered successfully: ${_userModel?.email}');
+        _isLoading = false;
+        notifyListeners();
         return true;
       }
       return false;
@@ -153,6 +155,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print('AuthProvider: Attempting to sign in with email: $email');
+      
       // 使用Firebase登入
       final UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -160,6 +164,8 @@ class AuthProvider extends ChangeNotifier {
       );
 
       final User? user = result.user;
+      print('AuthProvider: Sign in result - user: ${user?.uid ?? 'null'}');
+      
       if (user != null) {
         // 從Firestore獲取用戶資料
         await _loadUserFromFirestore(user.uid);
@@ -171,6 +177,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } on FirebaseAuthException catch (e) {
+      print('AuthProvider: Firebase Auth Exception - ${e.code}: ${e.message}');
       switch (e.code) {
         case 'user-not-found':
           _errorMessage = '用戶不存在';
@@ -191,6 +198,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
+      print('AuthProvider: General Exception - $e');
       _errorMessage = '登入失敗: $e';
       _isLoading = false;
       notifyListeners();
