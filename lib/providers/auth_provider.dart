@@ -29,6 +29,17 @@ class AuthProvider extends ChangeNotifier {
       final currentUser = _auth.currentUser;
       print('AuthProvider: Current user: ${currentUser?.uid ?? 'null'}');
       
+      // 清除任何預設的登入狀態（用於測試）
+      if (currentUser != null && currentUser.email == 'rbben521@gmail.com') {
+        print('AuthProvider: Clearing test user session...');
+        await _auth.signOut();
+        _userModel = null;
+        _isLoading = false;
+        print('AuthProvider: Test user session cleared');
+        notifyListeners();
+        return;
+      }
+      
       if (currentUser != null) {
         // 用戶已登入，獲取用戶資料
         print('AuthProvider: Loading user from Firestore...');
@@ -52,12 +63,9 @@ class AuthProvider extends ChangeNotifier {
             // 用戶未登入
             _userModel = null;
           }
-          // 只在狀態真正改變時才更新 loading 狀態
-          if (_isLoading) {
-            _isLoading = false;
-            print('AuthProvider: Auth state listener - loading set to false');
-            notifyListeners();
-          }
+          // 只在狀態真正改變時才通知監聽器
+          print('AuthProvider: Auth state listener - notifying listeners');
+          notifyListeners();
         });
       }
       
