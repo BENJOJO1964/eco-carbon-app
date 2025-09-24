@@ -9,7 +9,7 @@ class AuthProvider extends ChangeNotifier {
   UserModel? _userModel;
   bool _isLoading = false;
   String? _errorMessage;
-  bool _hasAuthListener = false;
+  bool _hasInitialized = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -19,55 +19,37 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _userModel != null;
 
   Future<void> initialize() async {
+    if (_hasInitialized) {
+      print('AuthProvider: Already initialized, skipping...');
+      return;
+    }
+    
     print('AuthProvider: Starting initialization...');
+    _hasInitialized = true;
     _isLoading = true;
     notifyListeners();
     
     try {
-      // 檢查當前用戶狀態
-      print('AuthProvider: Checking Firebase auth...');
-      final currentUser = _auth.currentUser;
-      print('AuthProvider: Current user: ${currentUser?.uid ?? 'null'}');
+      // 強制登出所有用戶（清除任何預設登入狀態）
+      print('AuthProvider: Force signing out all users...');
+      await _auth.signOut();
+      _userModel = null;
       
-      // 清除任何預設的登入狀態（用於測試）
-      if (currentUser != null && currentUser.email == 'rbben521@gmail.com') {
-        print('AuthProvider: Clearing test user session...');
-        await _auth.signOut();
-        _userModel = null;
+      // 設置認證狀態監聽器
+      print('AuthProvider: Setting up auth state listener...');
+      _auth.authStateChanges().listen((User? firebaseUser) async {
+        print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
+        if (firebaseUser != null) {
+          // 用戶已登入，獲取用戶資料
+          await _loadUserFromFirestore(firebaseUser.uid);
+        } else {
+          // 用戶未登入
+          _userModel = null;
+        }
         _isLoading = false;
-        print('AuthProvider: Test user session cleared');
+        print('AuthProvider: Auth state listener - notifying listeners');
         notifyListeners();
-        return;
-      }
-      
-      if (currentUser != null) {
-        // 用戶已登入，獲取用戶資料
-        print('AuthProvider: Loading user from Firestore...');
-        await _loadUserFromFirestore(currentUser.uid);
-      } else {
-        // 用戶未登入
-        print('AuthProvider: No current user');
-        _userModel = null;
-      }
-      
-      // 設置認證狀態監聽器（只設置一次）
-      if (!_hasAuthListener) {
-        _hasAuthListener = true;
-        print('AuthProvider: Setting up auth state listener...');
-        _auth.authStateChanges().listen((User? firebaseUser) async {
-          print('AuthProvider: Auth state changed: ${firebaseUser?.uid ?? 'null'}');
-          if (firebaseUser != null) {
-            // 用戶已登入，獲取用戶資料
-            await _loadUserFromFirestore(firebaseUser.uid);
-          } else {
-            // 用戶未登入
-            _userModel = null;
-          }
-          // 只在狀態真正改變時才通知監聽器
-          print('AuthProvider: Auth state listener - notifying listeners');
-          notifyListeners();
-        });
-      }
+      });
       
       // 完成初始化
       _isLoading = false;
