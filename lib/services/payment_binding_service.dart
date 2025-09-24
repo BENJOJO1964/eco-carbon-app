@@ -33,6 +33,8 @@ class PaymentBindingService extends ChangeNotifier {
       // 默認所有平台都綁定，消費者不需要設定
       _boundPlatforms[platform] = prefs.getBool('payment_$platform') ?? true;
     }
+    // 加載監控狀態
+    _isMonitoring = prefs.getBool('payment_monitoring') ?? false;
     notifyListeners();
   }
 
@@ -63,6 +65,10 @@ class PaymentBindingService extends ChangeNotifier {
     if (!hasBoundPlatforms || _isMonitoring) return;
 
     _isMonitoring = true;
+    // 保存監控狀態
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('payment_monitoring', true);
+    
     _monitoringTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       _simulatePaymentDetection();
     });
@@ -74,6 +80,11 @@ class PaymentBindingService extends ChangeNotifier {
     _isMonitoring = false;
     _monitoringTimer?.cancel();
     _monitoringTimer = null;
+    
+    // 保存監控狀態
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('payment_monitoring', false);
+    
     debugPrint('支付監控已停止');
     notifyListeners();
   }

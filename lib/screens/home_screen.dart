@@ -26,7 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
-    _initializeData();
+    // 使用 addPostFrameCallback 避免在構建過程中調用狀態更新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
   }
 
   @override
@@ -40,78 +43,279 @@ class _HomeScreenState extends State<HomeScreen> {
     final carbonProvider = Provider.of<CarbonProvider>(context, listen: false);
     
     if (authProvider.user != null) {
-      carbonProvider.initialize(authProvider.user!.id);
-      carbonProvider.startListening(authProvider.user!.id);
+      // 使用 Future.microtask 確保在當前構建完成後執行
+      Future.microtask(() async {
+        await carbonProvider.initialize(authProvider.user!.id);
+        carbonProvider.startListening(authProvider.user!.id);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          if (authProvider.user == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            children: const [
-              DashboardTab(),
-              RecordsTab(),
-              StatsTab(),
-              SettingsTab(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0F1419), // 深藍黑色
+              Color(0xFF1A2332), // 深藍灰色
+              Color(0xFF2D3748), // 中藍灰色
+              Color(0xFF1A202C), // 深灰色
             ],
-          );
-        },
+            stops: [0.0, 0.3, 0.7, 1.0],
+          ),
+        ),
+        child: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            if (authProvider.user == null) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF00D4FF),
+                ),
+              );
+            }
+
+            return Column(
+              children: [
+                // 頂部導航欄
+                _buildTopNavigationBar(context, authProvider),
+                // 主要內容區域
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    },
+                    children: const [
+                      DashboardTab(),
+                      RecordsTab(),
+                      StatsTab(),
+                      SettingsTab(),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        },
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: '首頁',
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF00D4FF), // 科技藍
+              Color(0xFF0099CC), // 深科技藍
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: '記錄',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: '統計',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '設定',
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00D4FF).withOpacity(0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AddRecordScreen()),
+            );
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopNavigationBar(BuildContext context, AuthProvider authProvider) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1E293B), // 深藍灰色
+            Color(0xFF334155), // 中藍灰色
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00D4FF).withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const AddRecordScreen()),
-          );
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              // 左側導航按鈕
+              Expanded(
+                child: Row(
+                  children: [
+                    _buildNavButton(
+                      icon: Icons.dashboard,
+                      label: '首頁',
+                      index: 0,
+                      isSelected: _currentIndex == 0,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildNavButton(
+                      icon: Icons.list,
+                      label: '記錄',
+                      index: 1,
+                      isSelected: _currentIndex == 1,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildNavButton(
+                      icon: Icons.analytics,
+                      label: '統計',
+                      index: 2,
+                      isSelected: _currentIndex == 2,
+                    ),
+                  ],
+                ),
+              ),
+              // 右側：設定按鈕 + 用戶頭像
+              Row(
+                children: [
+                  _buildNavButton(
+                    icon: Icons.settings,
+                    label: '設定',
+                    index: 3,
+                    isSelected: _currentIndex == 3,
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () {
+                      // 可以添加用戶資料頁面或登出功能
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF00D4FF), // 科技藍
+                            Color(0xFF0099CC), // 深科技藍
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF00D4FF).withOpacity(0.5),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00D4FF).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavButton({
+    required IconData icon,
+    required String label,
+    required int index,
+    required bool isSelected,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF00D4FF), // 科技藍
+                    Color(0xFF0099CC), // 深科技藍
+                  ],
+                )
+              : null,
+          color: isSelected ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected
+              ? Border.all(
+                  color: const Color(0xFF00D4FF).withOpacity(0.5),
+                  width: 1,
+                )
+              : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF00D4FF).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? Colors.white
+                  : const Color(0xFF94A3B8), // 淺灰色
+              size: 20,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected
+                    ? Colors.white
+                    : const Color(0xFF94A3B8), // 淺灰色
+                fontSize: 12,
+                fontWeight: isSelected
+                    ? FontWeight.w600
+                    : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,19 +327,6 @@ class DashboardTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('碳足跡追蹤'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // 顯示通知
-            },
-          ),
-        ],
-      ),
       body: Consumer<CarbonProvider>(
         builder: (context, carbonProvider, child) {
           if (carbonProvider.isLoading) {
@@ -348,6 +539,25 @@ class DashboardTab extends StatelessWidget {
                   ),
                 ),
 
+                // 掃描發票按鈕
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ElevatedButton.icon(
+                    onPressed: () => _navigateToScanInvoice(context),
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('掃描發票'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+
                 // 快速新增按鈕
                 Text(
                   '快速新增',
@@ -502,6 +712,15 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
+  void _navigateToScanInvoice(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CameraScanningScreen(),
+      ),
+    );
+  }
+
+
   void _openCameraForInvoiceScanning(BuildContext context) {
     // 導航到真正的相機掃描頁面
     Navigator.of(context).push(
@@ -598,11 +817,6 @@ class SettingsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('設定'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.user;

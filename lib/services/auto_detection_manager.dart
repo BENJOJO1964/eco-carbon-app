@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/carbon_record.dart';
 import 'invoice_carrier_service.dart';
 import 'payment_binding_service.dart';
@@ -50,8 +51,29 @@ class AutoDetectionManager extends ChangeNotifier {
   // 初始化自动检测系统
   Future<void> initialize() async {
     await _checkPermissions();
+    await _loadSettings();
     await _initializeServices();
     notifyListeners();
+  }
+
+  // 加载保存的设置
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isAutoDetectionEnabled = prefs.getBool('auto_detection_enabled') ?? false;
+    _isGpsEnabled = prefs.getBool('gps_enabled') ?? false;
+    _isInvoiceScanningEnabled = prefs.getBool('invoice_scanning_enabled') ?? false;
+    _isPaymentMonitoringEnabled = prefs.getBool('payment_monitoring_enabled') ?? false;
+    _isSensorDetectionEnabled = prefs.getBool('sensor_detection_enabled') ?? false;
+  }
+
+  // 保存设置
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('auto_detection_enabled', _isAutoDetectionEnabled);
+    await prefs.setBool('gps_enabled', _isGpsEnabled);
+    await prefs.setBool('invoice_scanning_enabled', _isInvoiceScanningEnabled);
+    await prefs.setBool('payment_monitoring_enabled', _isPaymentMonitoringEnabled);
+    await prefs.setBool('sensor_detection_enabled', _isSensorDetectionEnabled);
   }
 
   // 检查所需权限
@@ -114,6 +136,7 @@ class AutoDetectionManager extends ChangeNotifier {
   // 启用/禁用自动检测
   Future<void> setAutoDetectionEnabled(bool enabled) async {
     _isAutoDetectionEnabled = enabled;
+    await _saveSettings();
     
     if (enabled) {
       await _startAutoDetection();
@@ -127,6 +150,7 @@ class AutoDetectionManager extends ChangeNotifier {
   // 启用/禁用GPS追踪 - 简化实现
   Future<void> setGpsEnabled(bool enabled) async {
     _isGpsEnabled = enabled;
+    await _saveSettings();
     
     if (enabled && _locationPermissionGranted) {
       debugPrint('GPS追踪已启用');
@@ -142,6 +166,7 @@ class AutoDetectionManager extends ChangeNotifier {
   // 启用/禁用发票扫描 - 简化实现
   Future<void> setInvoiceScanningEnabled(bool enabled) async {
     _isInvoiceScanningEnabled = enabled;
+    await _saveSettings();
     
     if (enabled && _cameraPermissionGranted) {
       debugPrint('发票扫描已启用');
@@ -161,6 +186,7 @@ class AutoDetectionManager extends ChangeNotifier {
   // 启用/禁用支付监控 - 简化实现
   Future<void> setPaymentMonitoringEnabled(bool enabled) async {
     _isPaymentMonitoringEnabled = enabled;
+    await _saveSettings();
     
     if (enabled) {
       debugPrint('支付监控已启用');
@@ -178,6 +204,7 @@ class AutoDetectionManager extends ChangeNotifier {
   // 启用/禁用传感器检测 - 简化实现
   Future<void> setSensorDetectionEnabled(bool enabled) async {
     _isSensorDetectionEnabled = enabled;
+    await _saveSettings();
     
     if (enabled) {
       debugPrint('传感器检测已启用');

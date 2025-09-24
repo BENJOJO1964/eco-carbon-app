@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/invoice_carrier_service.dart';
+import 'camera_scanning_screen.dart';
 
 class InvoiceCarrierScreen extends StatefulWidget {
   const InvoiceCarrierScreen({super.key});
@@ -488,21 +489,11 @@ class _InvoiceCarrierScreenState extends State<InvoiceCarrierScreen> {
   }
 
   void _simulateInvoiceScanning() {
-    // 模擬發票掃描過程
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('掃描完成'),
-          content: const Text('已成功識別發票內容：\n\n• 商店：7-ELEVEN\n• 金額：NT\$ 85\n• 商品：咖啡、麵包\n• 預估碳足跡：0.12 kg CO₂\n\n已自動記錄到您的碳足跡追蹤中。'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('確定'),
-            ),
-          ],
-        );
-      },
+    // 導航到真實的相機掃描頁面
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CameraScanningScreen(),
+      ),
     );
   }
 }

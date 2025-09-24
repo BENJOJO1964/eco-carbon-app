@@ -178,7 +178,7 @@ class CarbonProvider extends ChangeNotifier {
 
   void startListening(String userId) {
     // Real-time listener implementation would go here
-    loadRecords(userId);
+    // 不重複調用 loadRecords，因為 initialize 已經調用了
   }
 
   List<String> getEcoSuggestions() {

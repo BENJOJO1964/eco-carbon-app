@@ -21,66 +21,135 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('統計'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                _selectedPeriod = value;
-              });
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'week',
-                child: Text('最近一周'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF2E7D32),
+              Color(0xFF4CAF50),
+            ],
+            stops: [0.0, 0.3],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // 自定義頂部區域
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '統計分析',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '了解您的碳足跡趨勢',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.filter_list,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        onSelected: (value) {
+                          setState(() {
+                            _selectedPeriod = value;
+                          });
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'week',
+                            child: Text('最近一周'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'month',
+                            child: Text('最近一月'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'year',
+                            child: Text('最近一年'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const PopupMenuItem(
-                value: 'month',
-                child: Text('最近一月'),
-              ),
-              const PopupMenuItem(
-                value: 'year',
-                child: Text('最近一年'),
+              // 主要內容區域
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                  ),
+                  child: Consumer<CarbonProvider>(
+                    builder: (context, carbonProvider, child) {
+                      if (carbonProvider.isLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E7D32)),
+                          ),
+                        );
+                      }
+
+                      final stats = carbonProvider.stats;
+                      final records = _filterRecordsByPeriod(carbonProvider.records);
+
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 總覽卡片
+                            _buildOverviewCard(stats, l10n),
+                            const SizedBox(height: 20),
+
+                            // 按類型統計
+                            _buildTypeChart(records),
+                            const SizedBox(height: 20),
+
+                            // 按日期統計
+                            _buildDateChart(records),
+                            const SizedBox(height: 20),
+
+                            // 詳細統計
+                            _buildDetailedStats(records),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ],
           ),
-        ],
-      ),
-      body: Consumer<CarbonProvider>(
-        builder: (context, carbonProvider, child) {
-          if (carbonProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final stats = carbonProvider.stats;
-          final records = _filterRecordsByPeriod(carbonProvider.records);
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 總覽卡片
-                _buildOverviewCard(stats, l10n),
-                const SizedBox(height: 16),
-
-                // 按類型統計
-                _buildTypeChart(records),
-                const SizedBox(height: 16),
-
-                // 按日期統計
-                _buildDateChart(records),
-                const SizedBox(height: 16),
-
-                // 詳細統計
-                _buildDetailedStats(records),
-              ],
-            ),
-          );
-        },
+        ),
       ),
     );
   }
@@ -107,62 +176,90 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Widget _buildOverviewCard(Map<String, dynamic> stats, AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.overview,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatItem(
-                    label: '總記錄',
-                    value: '${stats['totalRecords'] ?? 0}',
-                    icon: Icons.list,
-                    color: Colors.blue,
-                  ),
-                ),
-                Expanded(
-                  child: _StatItem(
-                    label: '總碳排放',
-                    value: '${(stats['totalCarbon'] ?? 0.0).toStringAsFixed(2)} kg',
-                    icon: Icons.eco,
-                    color: Colors.red,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatItem(
-                    label: '今日排放',
-                    value: '${(stats['averageDaily'] ?? 0.0).toStringAsFixed(2)} kg',
-                    icon: Icons.today,
-                    color: Colors.green,
-                  ),
-                ),
-                Expanded(
-                  child: _StatItem(
-                    label: '本周排放',
-                    value: '${(stats['averageWeekly'] ?? 0.0).toStringAsFixed(2)} kg',
-                    icon: Icons.date_range,
-                    color: Colors.orange,
-                  ),
-                ),
-              ],
-            ),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2E7D32),
+            Color(0xFF4CAF50),
           ],
         ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2E7D32).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.analytics,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Text(
+                '數據總覽',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 1.5,
+            children: [
+              _StatItem(
+                label: '總記錄',
+                value: '${stats['totalRecords'] ?? 0}',
+                icon: Icons.list_alt,
+                color: Colors.white,
+              ),
+              _StatItem(
+                label: '總碳排放',
+                value: '${(stats['totalCarbon'] ?? 0.0).toStringAsFixed(2)} kg',
+                icon: Icons.eco,
+                color: Colors.white,
+              ),
+              _StatItem(
+                label: '今日排放',
+                value: '${(stats['averageDaily'] ?? 0.0).toStringAsFixed(2)} kg',
+                icon: Icons.today,
+                color: Colors.white,
+              ),
+              _StatItem(
+                label: '本周排放',
+                value: '${(stats['averageWeekly'] ?? 0.0).toStringAsFixed(2)} kg',
+                icon: Icons.date_range,
+                color: Colors.white,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -171,14 +268,36 @@ class _StatsScreenState extends State<StatsScreen> {
     final carbonByType = CarbonCalculator.calculateCarbonByType(records);
     
     if (carbonByType.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Center(
-            child: Text(
-              '暫無數據',
-              style: TextStyle(color: Colors.grey[600]),
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
+          ],
+        ),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(
+                Icons.pie_chart_outline,
+                size: 48,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '暫無數據',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -199,31 +318,55 @@ class _StatsScreenState extends State<StatsScreen> {
       );
     }).toList();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '按類型統計',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: PieChart(
-                PieChartData(
-                  sections: pieChartData,
-                  centerSpaceRadius: 40,
-                  sectionsSpace: 2,
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2E7D32),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
+              const SizedBox(width: 12),
+              const Text(
+                '按類型統計',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2E7D32),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 220,
+            child: PieChart(
+              PieChartData(
+                sections: pieChartData,
+                centerSpaceRadius: 50,
+                sectionsSpace: 3,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -406,25 +549,42 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

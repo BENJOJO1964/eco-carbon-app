@@ -58,11 +58,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:ios:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'eco-app-demo',
-    storageBucket: 'eco-app-demo.appspot.com',
+    apiKey: 'AIzaSyC_qvGOPn4rJnQL1vJg3aSipo8A_DduVoE',
+    appId: '1:872667661054:ios:1f475dc20445cc9a5c9baf',
+    messagingSenderId: '872667661054',
+    projectId: 'eco-carbon-tracker-e05ed',
+    storageBucket: 'eco-carbon-tracker-e05ed.firebasestorage.app',
     iosBundleId: 'com.example.eco',
   );
 

@@ -54,104 +54,249 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('新增記錄'),
-        backgroundColor: Colors.green,
+        backgroundColor: const Color(0xFF2E7D32),
         foregroundColor: Colors.white,
+        elevation: 0,
         actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _saveRecord,
-            child: const Text(
-              '儲存',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _saveRecord,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF2E7D32),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E7D32)),
+                      ),
+                    )
+                  : const Text(
+                      '儲存',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
             ),
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 記錄類型選擇
-              Text(
-                '記錄類型',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF2E7D32),
+              Color(0xFF4CAF50),
+            ],
+            stops: [0.0, 0.1],
+          ),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(24),
+            ),
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _TypeChip(
-                    label: l10n.transportation,
-                    value: 'transport',
-                    selected: _selectedType == 'transport',
-                    onSelected: (value) => setState(() => _selectedType = value),
+                  // 記錄類型選擇標題
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E7D32),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        '記錄類型',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E7D32),
+                        ),
+                      ),
+                    ],
                   ),
-                  _TypeChip(
-                    label: l10n.shopping,
-                    value: 'shopping',
-                    selected: _selectedType == 'shopping',
-                    onSelected: (value) => setState(() => _selectedType = value),
+                  const SizedBox(height: 16),
+                  // 類型選擇容器
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _TypeChip(
+                          label: l10n.transportation,
+                          value: 'transport',
+                          selected: _selectedType == 'transport',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.shopping,
+                          value: 'shopping',
+                          selected: _selectedType == 'shopping',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.electricity,
+                          value: 'energy',
+                          selected: _selectedType == 'energy',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.diet,
+                          value: 'food',
+                          selected: _selectedType == 'food',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.delivery,
+                          value: 'delivery',
+                          selected: _selectedType == 'delivery',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.express,
+                          value: 'express',
+                          selected: _selectedType == 'express',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.accommodation,
+                          value: 'accommodation',
+                          selected: _selectedType == 'accommodation',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                        _TypeChip(
+                          label: l10n.other,
+                          value: 'other',
+                          selected: _selectedType == 'other',
+                          onSelected: (value) => setState(() => _selectedType = value),
+                        ),
+                      ],
+                    ),
                   ),
-                  _TypeChip(
-                    label: l10n.electricity,
-                    value: 'energy',
-                    selected: _selectedType == 'energy',
-                    onSelected: (value) => setState(() => _selectedType = value),
+                  const SizedBox(height: 24),
+
+                  // 根據類型顯示不同的輸入字段
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: _buildTypeSpecificFields(),
                   ),
-                  _TypeChip(
-                    label: l10n.diet,
-                    value: 'food',
-                    selected: _selectedType == 'food',
-                    onSelected: (value) => setState(() => _selectedType = value),
-                  ),
-                  _TypeChip(
-                    label: l10n.delivery,
-                    value: 'delivery',
-                    selected: _selectedType == 'delivery',
-                    onSelected: (value) => setState(() => _selectedType = value),
-                  ),
-                  _TypeChip(
-                    label: l10n.express,
-                    value: 'express',
-                    selected: _selectedType == 'express',
-                    onSelected: (value) => setState(() => _selectedType = value),
-                  ),
-                  _TypeChip(
-                    label: l10n.accommodation,
-                    value: 'accommodation',
-                    selected: _selectedType == 'accommodation',
-                    onSelected: (value) => setState(() => _selectedType = value),
-                  ),
-                  _TypeChip(
-                    label: l10n.other,
-                    value: 'other',
-                    selected: _selectedType == 'other',
-                    onSelected: (value) => setState(() => _selectedType = value),
+                  
+                  const SizedBox(height: 24),
+
+                  // 描述字段
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2E7D32),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              '描述（可選）',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF2E7D32),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _descriptionController,
+                          decoration: InputDecoration(
+                            hintText: '請輸入詳細描述...',
+                            filled: true,
+                            fillColor: const Color(0xFFF8F9FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          ),
+                          maxLines: 3,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-
-              // 根據類型顯示不同的輸入字段
-              _buildTypeSpecificFields(),
-              
-              const SizedBox(height: 24),
-
-              // 描述
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: '描述（可選）',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -646,15 +791,55 @@ class _TypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (isSelected) => onSelected(value),
-      selectedColor: Colors.green[100],
-      checkmarkColor: Colors.green[700],
-      labelStyle: TextStyle(
-        color: selected ? Colors.green[700] : Colors.grey[600],
-        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onSelected(value),
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected 
+                ? const Color(0xFF2E7D32) 
+                : const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected 
+                  ? const Color(0xFF2E7D32) 
+                  : Colors.grey.shade300,
+              width: 1,
+            ),
+            boxShadow: selected ? [
+              BoxShadow(
+                color: const Color(0xFF2E7D32).withOpacity(0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ] : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (selected) ...[
+                const Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  color: selected ? Colors.white : Colors.grey[700],
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
